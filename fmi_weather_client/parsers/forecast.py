@@ -18,6 +18,7 @@ def parse_forecast(body: str):
     """
     data = xmltodict.parse(body)
 
+    #print(data)
     station = _get_place(data)
     _LOGGER.debug("Received place: %s (%d, %d)", station.name, station.lat, station.lon)
 

@@ -2,9 +2,9 @@ from typing import Optional
 
 import asyncio
 
-from fmi_weather_client import http
-from fmi_weather_client.models import Weather
-from fmi_weather_client.parsers import forecast as forecast_parser
+from digitraffic_weather_client import http
+from digitraffic_weather_client.models import Weather
+from digitraffic_weather_client.parsers import forecast as forecast_parser
 
 def weather_by_station_id(station_id: int) -> Optional[Weather]:
     """
@@ -13,14 +13,55 @@ def weather_by_station_id(station_id: int) -> Optional[Weather]:
     :param station_id: FMI station ID (e.g., 12345)
     :return: Latest weather information if available; None otherwise
     """
-    response = http.request_weather_by_station_id(station_id)
-    forecast = forecast_parser.parse_forecast(response)
+    # Tiesääaseman perustiedot https://tie.digitraffic.fi/api/weather/v1/stations/14028
+    stationInformation = http.request_information_by_station_id(station_id)
+    print(stationInformation)
+    
+    # Tiesääaseman data esim. https://tie.digitraffic.fi/api/weather/v1/stations/14028/data
+    stationData = http.request_weather_by_station_id(station_id)
+    print(stationData)
 
+    forecast = forecast_parser.parse_forecast(stationData)
+    
+    
+    print("************")
+    print(forecast)
     if len(forecast.forecasts) == 0:
         return None
 
+    
+    
     weather_state = forecast.forecasts[-1]
-    return Weather(forecast.place, forecast.lat, forecast.lon, weather_state)
+    print("************")
+    print(weather_state)
+    #print("************")
+    #weather_state = forecast.forecasts[0]
+    #print("************")
+    #print(weather_state)
+    #print("************")
+    #weather_state = forecast.forecasts[2]
+    #print("************")
+    #print(weather_state)
+    #print("************")
+    #wind_speed_value = weather_state.wind_speed.value
+    #wind_speed_unit = weather_state.wind_speed.unit
+    #print(f"Wind Speed: {wind_speed_value} {wind_speed_unit}")
+    ##print(weather_state
+    print("************")
+
+    # Check if wind speed data is available in the latest forecast
+    for entry in forecast.forecasts:
+       if entry['type'] == 'AverageWindSpeed' or entry['type'] == 'MaxWindSpeed':
+        wind_speed_value = entry['value']
+        wind_speed_unit = entry['unit']
+        break
+
+    if wind_speed_value is not None and wind_speed_unit is not None:
+       print(f"Wind Speed: {wind_speed_value} {wind_speed_unit}")
+    else:
+       print("Wind speed data not available")
+
+    return Weather(forecast.forecasts.place, forecast.lat, forecast.lon, weather_state)
 
 async def async_weather_by_station_id(station_id: int) -> Optional[Weather]:
     """
