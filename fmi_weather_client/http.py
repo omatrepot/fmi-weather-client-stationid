@@ -39,6 +39,15 @@ def request_weather_by_place(place: str) -> str:
     params = _create_params(RequestType.WEATHER, 10, place=place)
     return _send_request(params)
 
+def request_weather_by_stationid(stationid: int) -> str:
+    """
+    Get the latest forecast by station id
+
+    :param stationid: FMI Station Id name #https://www.ilmatieteenlaitos.fi/havaintoasemat
+    :return: Forecast response
+    """
+    params = _create_params(RequestType.WEATHER, 10, stationid=stationid)
+    return _send_request(params)
 
 def request_forecast_by_coordinates(lat: float, lon: float, timestep_hours: int = 24) -> str:
     """
@@ -67,11 +76,13 @@ def request_forecast_by_place(place: str, timestep_hours: int = 24) -> str:
     return _send_request(params)
 
 
+
 def _create_params(request_type: RequestType,
                    timestep_minutes: int,
                    place: Optional[str] = None,
                    lat: Optional[float] = None,
-                   lon: Optional[float] = None) -> Dict[str, Any]:
+                   lon: Optional[float] = None,
+                   stationid: Optional[int] = None) -> Dict[str, Any]:
     """
     Create query parameters
     :param timestep_minutes: Timestamp minutes
@@ -81,14 +92,14 @@ def _create_params(request_type: RequestType,
     :return: Parameters
     """
 
-    if place is None and lat is None and lon is None:
+    if (place is None and lat is None and lon is None) or (stationid is None):
         raise ValueError("Missing location parameter")
 
     if request_type is RequestType.WEATHER:
-        end_time = datetime.utcnow().replace(tzinfo=timezone.utc)
+        end_time = datetime.now().replace(tzinfo=timezone.utc)
         start_time = end_time - timedelta(minutes=10)
     elif request_type is RequestType.FORECAST:
-        start_time = datetime.utcnow().replace(tzinfo=timezone.utc)
+        start_time = datetime.now().replace(tzinfo=timezone.utc)
         end_time = start_time + timedelta(days=4)
     else:
         raise ValueError(f"Invalid request_type {request_type}")
@@ -109,11 +120,14 @@ def _create_params(request_type: RequestType,
         )
     }
 
-    if lat is not None and lon is not None:
+    if (lat is not None and lon is not None):
         params['latlon'] = f'{lat},{lon}'
 
     if place is not None:
         params['place'] = place.strip().replace(' ', '')
+
+    if stationid is not None:
+        params['stationid'] = stationid.strip().replace(' ', '')
 
     return params
 
