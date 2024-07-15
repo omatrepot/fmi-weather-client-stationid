@@ -92,7 +92,7 @@ def _create_params(request_type: RequestType,
     :return: Parameters
     """
 
-    if (place is None and lat is None and lon is None) or (stationid is None):
+    if (place is None and lat is None and lon is None) and (stationid is None):
         raise ValueError("Missing location parameter")
 
     if request_type is RequestType.WEATHER:
@@ -127,7 +127,7 @@ def _create_params(request_type: RequestType,
         params['place'] = place.strip().replace(' ', '')
 
     if stationid is not None:
-        params['stationid'] = stationid.strip().replace(' ', '')
+        params['stationid'] = stationid
 
     return params
 

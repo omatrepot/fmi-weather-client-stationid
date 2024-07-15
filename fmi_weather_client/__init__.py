@@ -6,6 +6,32 @@ from fmi_weather_client import http
 from fmi_weather_client.models import Weather
 from fmi_weather_client.parsers import forecast as forecast_parser
 
+def weather_by_stationid(stationid: int) -> Optional[Weather]:
+    """
+    Get the latest weather information by station id.
+
+    :param stationid: FMI Station Id name #https://www.ilmatieteenlaitos.fi/havaintoasemat
+    :return: Latest weather information if available; None otherwise
+    """
+    response = http.request_weather_by_stationid(stationid)
+    forecast = forecast_parser.parse_forecast(response)
+
+    if len(forecast.forecasts) == 0:
+        return None
+
+    weather_state = forecast.forecasts[-1]
+    return Weather(forecast.place, forecast.lat, forecast.lon, weather_state)
+
+
+async def async_weather_by_stationid(stationid: int) -> Optional[Weather]:
+    """
+    Get the latest weather information by station id asynchronously.
+
+    :param stationid: FMI Station Id name #https://www.ilmatieteenlaitos.fi/havaintoasemat
+    :return: Latest weather information if available; None otherwise
+    """
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(None, weather_by_stationid, stationid)
 
 def weather_by_coordinates(lat: float, lon: float) -> Optional[Weather]:
     """
@@ -18,6 +44,8 @@ def weather_by_coordinates(lat: float, lon: float) -> Optional[Weather]:
     response = http.request_weather_by_coordinates(lat, lon)
     forecast = forecast_parser.parse_forecast(response)
 
+    print(response)
+    
     if len(forecast.forecasts) == 0:
         return None
 
