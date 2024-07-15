@@ -127,7 +127,7 @@ def _create_params(request_type: RequestType,
         params['place'] = place.strip().replace(' ', '')
 
     if stationid is not None:
-        params['stationid'] = stationid
+        params['fmisid'] = stationid
 
     return params
 

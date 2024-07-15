@@ -8,13 +8,14 @@ try:
     # Get forecast for Helsinki
     helsinki_forecast = fmi.forecast_by_place_name("Helsinki")
 
-    # Get current weather in Salo station id
+    # Get current weather in given station
     # Salo Kiikala lentokenttä	100967
     # Salo Kärkkä	100955
     # Somero Salkola	101128
     # Kemiönsaari Kemiö	100951
-    
+    #https://www.ilmatieteenlaitos.fi/havaintoasemat
     salo_weather = fmi.weather_by_stationid(100955)
+
     # Print current temperature
     print()
     print(f"Temperature @ {salo_weather.place}: {salo_weather.data.temperature}")

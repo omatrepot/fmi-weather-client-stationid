@@ -43,8 +43,6 @@ def weather_by_coordinates(lat: float, lon: float) -> Optional[Weather]:
     """
     response = http.request_weather_by_coordinates(lat, lon)
     forecast = forecast_parser.parse_forecast(response)
-
-    print(response)
     
     if len(forecast.forecasts) == 0:
         return None
