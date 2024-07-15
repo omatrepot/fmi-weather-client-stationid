@@ -16,21 +16,26 @@ try:
     # Salo Kärkkä	100955
     # Somero Salkola	101128
     # Kemiönsaari Kemiö	100951
-    #salo_weather = fmi.weather_by_station_id(100955)
-
+    
+    salo_weather = fmi.weather_by_station_id(100955)
+    
     haukkala_road_weather = digitraffic.weather_by_station_id(100955)
+    
+    #print(haukkala_road_weather.place)
+    print("-----salo_weather")
+    print(f"Temperature @ {haukkala_road_weather.place}: {haukkala_road_weather.data.temperature}")
 
     # Print current temperature
-    #print()
+    #print(salo_weather)
     #print(f"Temperature @ {kilpisjarvi_weather.place}: {kilpisjarvi_weather.data.temperature}")
 
     # Print current temperature
-    #print()
-    #print(f"Temperature @ {salo_weather.place}: {salo_weather.data.temperature}")
+    print()
+    print(f"Temperature @ {salo_weather.place}: {salo_weather.data.temperature}")
 
     # Print current temperature
     print()
-    print(f"DF Temperature @ {haukkala_road_weather.place}: {haukkala_road_weather.data.temperature}")
+    #print(f"DF Temperature @ {haukkala_road_weather.place}: {haukkala_road_weather.data.temperature}")
 
     # Print temperature forecasts
     print()

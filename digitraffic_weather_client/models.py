@@ -50,59 +50,65 @@ class SensorValue(NamedTuple):
 
 class WeatherData(NamedTuple):
     """Represents a weather"""
-    time: datetime
-    temperature: Value
-    dew_point: Value
-    pressure: Value
-    humidity: Value
-    wind_direction: Value
-    wind_speed: Value
-    wind_u_component: Value
-    wind_v_component: Value
-    wind_max: Value  # Max 10 minutes average
-    wind_gust: Value  # Max 3 seconds average
-    symbol: Value
-    cloud_cover: Value
-    cloud_low_cover: Value
-    cloud_mid_cover: Value
-    cloud_high_cover: Value
+    time: Optional[datetime]
+    temperature: Optional[Value]
+    dew_point: Optional[Value] = None
+    pressure: Optional[Value] = None
+    humidity: Optional[Value] = None
+    wind_direction: Optional[Value] = None
+    wind_speed: Optional[Value] = None
+    wind_u_component: Optional[Value] = None
+    wind_v_component: Optional[Value] = None
+    wind_max: Optional[Value] = None # Max 10 minutes average
+    wind_gust: Optional[Value] = None # Max 3 seconds average
+    symbol: Optional[Value] = None
+    cloud_cover: Optional[Value] = None
+    cloud_low_cover: Optional[Value] = None
+    cloud_mid_cover: Optional[Value] = None
+    cloud_high_cover: Optional[Value] = None
 
     # Amount of rain in the past 1h
-    precipitation_amount: Value
+    precipitation_amount: Optional[Value] = None
 
     # Short wave radiation (light, UV) accumulation
-    radiation_short_wave_acc: Value
+    radiation_short_wave_acc: Optional[Value] = None
 
     # Short wave radiation (light, UV) net accumulation on the surface
-    radiation_short_wave_surface_net_acc: Value
+    radiation_short_wave_surface_net_acc: Optional[Value] = None
 
     # Long wave radiation (heat, infrared) accumulation
-    radiation_long_wave_acc: Value
+    radiation_long_wave_acc: Optional[Value] = None
 
     # Long wave radiation (light, UV) net accumulation on the surface
-    radiation_long_wave_surface_net_acc: Value
+    radiation_long_wave_surface_net_acc: Optional[Value] = None
 
     # Diffused short wave
-    radiation_short_wave_diff_surface_acc: Value
+    radiation_short_wave_diff_surface_acc: Optional[Value] = None
 
-    geopotential_height: Value
-    land_sea_mask: Value
+    geopotential_height: Optional[Value] = None
+    land_sea_mask: Optional[Value] = None
 
     # Calculated "feels like" temperature
-    feels_like: Value
+    feels_like: Optional[Value] = None
 
 class Weather(NamedTuple):
     """Represents a weather"""
     place: str
+    id: int
     lat: float
     lon: float
+    data_updated_time: datetime
     data: WeatherData
 
 class Forecast(NamedTuple):
     """Represents weather forecast at a station"""
+    place: str
     id: int
+    data: float
+    lon: float
     data_updated_time: datetime
-    weather_data: WeatherData
+    forecasts: List[WeatherData]
+    #forecasts: WeatherData
 
     @classmethod
     def from_json(cls, data: Dict[str, Any]) -> 'Forecast':
@@ -112,5 +118,5 @@ class Forecast(NamedTuple):
         return cls(
             id=data.get('id', 0),
             data_updated_time=datetime.fromisoformat(data.get('dataUpdatedTime', '')),
-            weather_data=WeatherData.from_json(data)
+            forecasts=WeatherData.from_json(data)
         )
