@@ -21,9 +21,9 @@ try:
     
     haukkala_road_weather = digitraffic.weather_by_station_id(100955)
     
-    #print(haukkala_road_weather.place)
-    print("-----salo_weather")
-    print(f"Temperature @ {haukkala_road_weather.place}: {haukkala_road_weather.data.temperature}")
+    #print(haukkala_road_weather.data.temperature)
+    #print("-----salo_weather")
+    #print(f"Temperature @ {haukkala_road_weather.place}: {haukkala_road_weather.data.temperature}")
 
     # Print current temperature
     #print(salo_weather)

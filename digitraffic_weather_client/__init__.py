@@ -1,6 +1,6 @@
 from typing import Optional
 
-import asyncio,datetime
+import asyncio,datetime,json
 
 from digitraffic_weather_client import http
 from digitraffic_weather_client.models import Weather
@@ -14,24 +14,39 @@ def weather_by_station_id(station_id: int) -> Optional[Weather]:
     :return: Latest weather information if available; None otherwise
     """
     # Tiesääaseman perustiedot https://tie.digitraffic.fi/api/weather/v1/stations/14028
-    stationInformation = http.request_information_by_station_id(station_id)
+    response_text = http.request_information_by_station_id(station_id)
     #print(stationInformation)
-    
+
+    # Parse the JSON string into a dictionary
+    stationInformation = json.loads(response_text)
+
+    # Extract coordinates and Finnish name
+    latitude = stationInformation["geometry"]["coordinates"][0]
+    longitude = stationInformation["geometry"]["coordinates"][1]
+    fi_name = stationInformation["properties"]["names"]["fi"]
+
+    # New code to extract and convert dataUpdatedTime
+    data_updated_time_str = stationInformation["properties"]["dataUpdatedTime"]
+    data_updated_time = datetime.datetime.strptime(data_updated_time_str, "%Y-%m-%dT%H:%M:%SZ")
+
+    if (fi_name is not None and latitude is not None and longitude is not None):
+        print(f"Station {station_id} is located at {latitude}, {longitude} ({fi_name}) and updated at {data_updated_time}")
+
     # Tiesääaseman data esim. https://tie.digitraffic.fi/api/weather/v1/stations/14028/data
-    stationData = http.request_weather_by_station_id(station_id)
+    #stationData = http.request_weather_by_station_id(station_id)
 
-    forecast = forecast_parser.parse_forecast(stationData)
+    #forecast = forecast_parser.parse_forecast(stationData)
     
     
 
-    if len(forecast.forecasts) == 0:
-        return None
+    #if len(forecast.forecasts) == 0:
+    #    return None
 
-    weather_state = forecast.forecasts[-1]
+    #weather_state = forecast.forecasts[-1]
 
-    print(weather_state)
+    #print(weather_state)
 
-    return Weather("stationData.place",3232, "stationData.lat", "stationData.lon",datetime.datetime.now(), weather_state)
+    return Weather("stationData.place",3232, "stationData.lat", "stationData.lon",datetime.datetime.now(), "")
 
     #forecast = forecast_parser.parse_forecast(stationData)
     
@@ -83,7 +98,7 @@ def weather_by_station_id(station_id: int) -> Optional[Weather]:
     #   print("Wind speed data not available")
     #return Weather(forecast.forecasts.place, forecast.lat, forecast.lon, weather_state)
     #return Forecast(station.name, station.lat, station.lon, forecasts)
-    return Weather(forecast.place, forecast.lat, forecast.lon, weather_state)
+    #return Weather(forecast.place, forecast.lat, forecast.lon, weather_state)
 
 async def async_weather_by_station_id(station_id: int) -> Optional[Weather]:
     """

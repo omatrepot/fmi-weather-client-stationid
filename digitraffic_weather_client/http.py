@@ -14,7 +14,7 @@ _LOGGER = logging.getLogger(__name__)
 class RequestType(Enum):
     """Possible request types"""
     WEATHER = 0
-    FORECAST = 1
+    STATION = 1
 
 def request_information_by_station_id(station_id: int) -> str:
     """
@@ -24,9 +24,10 @@ def request_information_by_station_id(station_id: int) -> str:
     :param lon: Longitude (e.g. 62.39758)
     :return: Latest weather information
     """
-    params = _create_params(RequestType.WEATHER, 10, "", "", stationid=station_id)
+    params = _create_params(10, stationid=station_id)
 
-    return _send_info_request(params)
+    return _send_request(RequestType.STATION,params)
+
 
 def request_weather_by_station_id(station_id: int) -> str:
     """
@@ -36,17 +37,13 @@ def request_weather_by_station_id(station_id: int) -> str:
     :param lon: Longitude (e.g. 62.39758)
     :return: Latest weather information
     """
-    params = _create_params(RequestType.WEATHER, 10, "", "", stationid=station_id)
+    params = _create_params(10, stationid=station_id)
 
-    return _send_request(params)
+    return _send_request(RequestType.WEATHER,params)
 
 
-def _create_params(request_type: RequestType,
-                   timestep_minutes: int,
-                   place: Optional[str] = None,
-                   lat: Optional[float] = None,
-                   lon: Optional[float] = None,
-                   stationid: Optional[int] = None)-> Dict[str, Any]:
+def _create_params(timestep_minutes: int,
+                   stationid: int)-> Dict[str, Any]:
     """
     Create query parameters
     :param timestep_minutes: Timestamp minutes
@@ -57,17 +54,17 @@ def _create_params(request_type: RequestType,
     :return: Parameters
     """
 
-    if (place is None and lat is None and lon is None):
+    if (stationid is None):
         raise ValueError("Missing location parameter")
 
-    if request_type is RequestType.WEATHER:
-        end_time = datetime.utcnow().replace(tzinfo=timezone.utc)
-        start_time = end_time - timedelta(minutes=10)
-    elif request_type is RequestType.FORECAST:
-        start_time = datetime.utcnow().replace(tzinfo=timezone.utc)
-        end_time = start_time + timedelta(days=4)
-    else:
-        raise ValueError(f"Invalid request_type {request_type}")
+    #if request_type is RequestType.WEATHER:
+    #    end_time = datetime.now.replace(tzinfo=timezone.utc)
+    #    start_time = end_time - timedelta(minutes=10)
+    #elif request_type is RequestType.FORECAST:
+    #    start_time = datetime.utcnow().replace(tzinfo=timezone.utc)
+    #    end_time = start_time + timedelta(days=4)
+    #else:
+    #    raise ValueError(f"Invalid request_type {request_type}")
 
     params = {  
         #'Digitraffic-User': 'Junamies/FoobarApp 1.0' # Choose descriptive name, eg. your organisation and append it with your nickname (not real name)
@@ -97,7 +94,8 @@ def _create_params(request_type: RequestType,
 
     return params
 
-def _send_request(params: Dict[str, Any]) -> str:
+def _send_request(request_type: RequestType,
+                  params: Dict[str, Any]) -> str:
     """
     Send a request to FMI service and return the body
     :param params: Query parameters
@@ -107,9 +105,13 @@ def _send_request(params: Dict[str, Any]) -> str:
     #$tiesaa_id = '14028'; # Find id from https://tie.digitraffic.fi/api/weather/v1/stations/
 
 
+    if request_type is RequestType.WEATHER:
+        url ='https://tie.digitraffic.fi/api/weather/v1/stations/14028/data'
+    else:
+        url ='https://tie.digitraffic.fi/api/weather/v1/stations/14028'
 
     #url = 'https://tie.digitraffic.fi/api/tms/v1/sensors'
-    url ='https://tie.digitraffic.fi/api/weather/v1/stations/14028/data'
+    #url ='https://tie.digitraffic.fi/api/weather/v1/stations/14028/data'
 
     #print(params)
 
@@ -128,37 +130,6 @@ def _send_request(params: Dict[str, Any]) -> str:
 
     return response.text
 
-
-def _send_info_request(params: Dict[str, Any]) -> str:
-    """
-    Send a request to FMI service and return the body
-    :param params: Query parameters
-    :return: Response body
-    """
-
-    #$tiesaa_id = '14028'; # Find id from https://tie.digitraffic.fi/api/weather/v1/stations/
-
-
-
-    #url = 'https://tie.digitraffic.fi/api/tms/v1/sensors'
-    url ='https://tie.digitraffic.fi/api/weather/v1/stations/14028'
-
-    #print(params)
-
-    _LOGGER.debug("GET request to %s. Parameters: %s", url, params)
-    response = requests.get(url, params=params, timeout=10)
-
-    #print(response.text)
-
-    if response.status_code == 200:
-        _LOGGER.debug("GET response from %s in %d ms. Status: %d.",
-                      url,
-                      response.elapsed.microseconds / 1000,
-                      response.status_code)
-    else:
-        _handle_errors(response)
-
-    return response.text
 
 
 def _handle_errors(response: requests.Response):
